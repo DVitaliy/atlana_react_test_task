@@ -11,9 +11,7 @@ const Input: FC<IInputProps> = ({ setvalue, path, ...props }) => {
   const location = useLocation()
 
   const getSearchValue = useCallback(() => {
-    return location
-      ? decodeURIComponent(new URLSearchParams(location.search).get("q") ?? "")
-      : ""
+    return location ? decodeURIComponent(new URLSearchParams(location.search).get("q") ?? "") : ""
   }, [location])
 
   const [query, setQuery] = useState<string>(() => getSearchValue())
@@ -25,9 +23,8 @@ const Input: FC<IInputProps> = ({ setvalue, path, ...props }) => {
 
   useEffect(() => {
     clearTimeout(timer.current)
-    timer.current = setTimeout(() => {
-      if (query !== getSearchValue())
-        navigate(`${path}?q=${encodeURIComponent(query)}`)
+    timer.current = window.setTimeout(() => {
+      if (query !== getSearchValue()) navigate(`${path}?q=${encodeURIComponent(query)}`)
       setvalue(query)
     }, 1000)
 
@@ -42,13 +39,7 @@ const Input: FC<IInputProps> = ({ setvalue, path, ...props }) => {
   return (
     <div className="panel-block">
       <p className="control has-icons-left">
-        <input
-          className="input"
-          type="text"
-          value={query ?? ""}
-          onChange={handleChange}
-          {...props}
-        />
+        <input className="input" type="text" value={query ?? ""} onChange={handleChange} {...props} />
         <span className="icon is-left">
           <i className="fas fa-search" aria-hidden="true"></i>
         </span>
