@@ -27,7 +27,7 @@ const Listing: FC<RouteComponentProps> = ({ uri, location }) => {
             `search/users?${endpoint}`,
             (data) => {
               const items = data.items as IUserDetails[]
-              //localStorage.setItem(endpoint, JSON.stringify(items))
+              localStorage.setItem(endpoint, JSON.stringify(items))
               setListusers(items.length ? items : null)
             },
             (err) => {
