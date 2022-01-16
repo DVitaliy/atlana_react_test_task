@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react"
 import { Link } from "@reach/router"
 import { IUserDetails, IUserRepoDetails } from "../pages/details"
-import { getData } from "../api"
+import getData from "../api"
 
 interface ICard {
   user: IUserDetails
@@ -12,7 +12,7 @@ interface ICardRepo {
 
 export const CardList: FC<ICard> = ({ user }) => {
   const { login, avatar_url } = user
-  const [userRepos, setUserRepos] = useState<IUserDetails["public_repos"] | null>(null)
+  const [userRepos, setUserRepos] = useState<IUserDetails["public_repos"] | null | undefined>(undefined)
 
   useEffect(() => {
     const endpoint = `users/${login}`
@@ -22,10 +22,14 @@ export const CardList: FC<ICard> = ({ user }) => {
         const data = JSON.parse(storageUser) as IUserDetails
         setUserRepos(data["public_repos"])
       } else {
-        getData<IUserDetails>(endpoint, (item) => {
-          localStorage.setItem(endpoint, JSON.stringify(item))
-          setUserRepos(item["public_repos"])
-        })
+        getData<IUserDetails>(
+          endpoint,
+          (item) => {
+            localStorage.setItem(endpoint, JSON.stringify(item))
+            setUserRepos(item["public_repos"])
+          },
+          () => setUserRepos(null)
+        )
       }
     } catch {}
   }, [login])
@@ -33,7 +37,9 @@ export const CardList: FC<ICard> = ({ user }) => {
   return (
     <div className="panel-block">
       <figure className="image is-32x32">
-        <img src={`${avatar_url}&s=32`} alt={login} />
+        <Link to={`u/${login}`}>
+          <img src={`${avatar_url}&s=32`} alt={login} />
+        </Link>
       </figure>
       <Link to={`u/${login}`} className="is-size-5 is-flex-grow-1 ml-5">
         {login}
@@ -42,7 +48,7 @@ export const CardList: FC<ICard> = ({ user }) => {
         Repo:{" "}
         {userRepos ?? (
           <span className="icon">
-            <i className="fas fa-spinner fa-pulse"></i>
+            {userRepos === undefined ? <i className="fas fa-spinner fa-pulse"></i> : <i className="fas fa-ban"></i>}
           </span>
         )}
       </div>

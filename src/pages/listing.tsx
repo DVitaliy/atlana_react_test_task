@@ -3,10 +3,12 @@ import { FC, Fragment, useEffect, useState } from "react"
 import { CardList } from "../Components/card"
 import Input from "../Components/input"
 import { NotFound } from "../Components/notfound"
+import { Error } from "../Components/error"
 import { IUserDetails } from "./details"
-import { getData } from "../api"
+import getData from "../api"
 
 const Listing: FC<RouteComponentProps> = ({ uri, location }) => {
+  const [responseErr, setResponseErr] = useState<string | null>(null)
   const [username, setUsername] = useState<string>(() => {
     return location ? decodeURIComponent(new URLSearchParams(location.search).get("q") ?? "") : ""
   })
@@ -25,11 +27,11 @@ const Listing: FC<RouteComponentProps> = ({ uri, location }) => {
             `search/users?${endpoint}`,
             (data) => {
               const items = data.items as IUserDetails[]
-              localStorage.setItem(endpoint, JSON.stringify(items))
+              //localStorage.setItem(endpoint, JSON.stringify(items))
               setListusers(items.length ? items : null)
             },
             (err) => {
-              alert(err)
+              setResponseErr(err)
             }
           )
         }
@@ -40,6 +42,12 @@ const Listing: FC<RouteComponentProps> = ({ uri, location }) => {
       setListusers([])
     }
   }, [username])
+
+  useEffect(() => {
+    return () => setResponseErr(null)
+  }, [])
+
+  if (responseErr) return <Error>{responseErr}</Error>
 
   return (
     <Fragment>

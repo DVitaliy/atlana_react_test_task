@@ -4,7 +4,8 @@ import { CardDetail, CardRepo } from "../Components/card"
 import Input from "../Components/input"
 import { Loading } from "../Components/loading"
 import { NotFound } from "../Components/notfound"
-import { getData } from "../api"
+import { Error } from "../Components/error"
+import getData from "../api"
 
 export interface IUserDetails {
   id: string
@@ -32,6 +33,7 @@ interface IDetailsProps extends RouteComponentProps {
 }
 
 const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
+  const [responseErr, setResponseErr] = useState<string | null>(null)
   const [userDetail, setUserDetail] = useState<IUserDetails | null>(null)
   const [userRepoList, setUserRepoList] = useState<IUserRepoDetails[] | null>(null)
   const [repoName, setRepoName] = useState<string>(() => {
@@ -52,7 +54,7 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
             setUserDetail(item)
           },
           (err) => {
-            alert(err)
+            setResponseErr(err)
           }
         )
       }
@@ -61,7 +63,7 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
 
   // Get user's repo data
   useEffect(() => {
-    if (userDetail) {
+    if (userDetail && userDetail.public_repos) {
       const endpoint = encodeURIComponent(`${repoName} user:${login}`)
       try {
         const storageRepo = localStorage.getItem(endpoint)
@@ -73,17 +75,23 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
             `search/repositories?q=${endpoint}`,
             (data) => {
               const items = data.items as IUserRepoDetails[]
-              localStorage.setItem(endpoint, JSON.stringify(items))
+              //localStorage.setItem(endpoint, JSON.stringify(items))
               setUserRepoList(items.length ? items : null)
             },
             (err) => {
-              alert(err)
+              setResponseErr(err)
             }
           )
         }
       } catch {}
     }
   }, [login, userDetail, repoName])
+
+  useEffect(() => {
+    return () => setResponseErr(null)
+  }, [])
+
+  if (responseErr) return <Error>{responseErr}</Error>
 
   return (
     <Fragment>
@@ -92,11 +100,12 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
         placeholder="Search for User's Repositories"
         path={uri ?? `/u/${login}`}
         setvalue={setRepoName}
-        disabled={!userDetail}
+        disabled={!userDetail || !!!userDetail.public_repos}
       />
       {userRepoList && userRepoList.map((repo) => <CardRepo key={repo.id} repo={repo} />)}
-
+      {!userDetail && userRepoList === null && <Loading />}
       {userDetail && repoName && userRepoList === null && <NotFound />}
+      {userDetail && !userDetail.public_repos && <NotFound />}
     </Fragment>
   )
 }
