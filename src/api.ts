@@ -8,7 +8,7 @@ const getData = async <T>(endpoint: string, cb: (args: T) => void, err?: (args: 
     const item: T & IErr = await response.json()
 
     const ratelimitReset: number = Number(response.headers.get("x-ratelimit-reset"))
-    // const ratelimitRemaining = response.headers.get("x-ratelimit-remaining")
+
     if (response.ok) {
       cb(item)
     } else {
@@ -18,10 +18,8 @@ const getData = async <T>(endpoint: string, cb: (args: T) => void, err?: (args: 
           message += `\nIt'll over at ${new Date(ratelimitReset * 1000)}`
           break
         case 404:
-          message = "123"
           break
         case 422:
-          message = "123"
           break
         default:
           throw new Error(`Unknow status: ${response.status}`)
