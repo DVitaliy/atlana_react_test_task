@@ -42,6 +42,7 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
 
   // Get user data
   useEffect(() => {
+    setResponseErr(null)
     const endpoint = `users/${login}`
     try {
       const storageUser = localStorage.getItem(endpoint)
@@ -55,6 +56,7 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
           },
           (err) => {
             setResponseErr(err)
+            setUserDetail(null)
           }
         )
       }
@@ -63,7 +65,12 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
 
   // Get user's repo data
   useEffect(() => {
-    if (userDetail && userDetail.public_repos) {
+    if (
+      userDetail &&
+      login &&
+      userDetail.public_repos &&
+      userDetail.login.toLocaleLowerCase() === login.toLocaleLowerCase()
+    ) {
       const endpoint = encodeURIComponent(`${repoName} user:${login}`)
       try {
         const storageRepo = localStorage.getItem(endpoint)
@@ -75,7 +82,7 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
             `search/repositories?q=${endpoint}`,
             (data) => {
               const items = data.items as IUserRepoDetails[]
-              //localStorage.setItem(endpoint, JSON.stringify(items))
+              localStorage.setItem(endpoint, JSON.stringify(items))
               setUserRepoList(items.length ? items : null)
             },
             (err) => {
@@ -86,10 +93,6 @@ const Details: FC<IDetailsProps> = ({ login, uri, location }) => {
       } catch {}
     }
   }, [login, userDetail, repoName])
-
-  useEffect(() => {
-    return () => setResponseErr(null)
-  }, [])
 
   if (responseErr) return <Error>{responseErr}</Error>
 
