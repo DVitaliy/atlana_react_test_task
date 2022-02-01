@@ -12,6 +12,8 @@ const getData = async <T>(endpoint: string, cb: (args: T) => void, err?: (args: 
     if (response.ok) {
       cb(item)
     } else {
+      // Catching errors and the ability to set a specific message
+
       let { message } = item
       switch (response.status) {
         case 403:
