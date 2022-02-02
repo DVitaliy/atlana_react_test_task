@@ -1,5 +1,16 @@
 language: node_js
-scripts:
-  - npm install codecov -g
+node_js:
+  - 14
+install:
+  - yarn
+cache:
+  directories:
+    - node_modules
+before_script:
+  - yarn install
+  - npm install -g codecov
+script:
+  - CI=false  yarn build
+  - yarn test --coverage
 after_success:
-  - codecov
+  - codecov --token=${{ secrets.CODECOV_TOKEN }}
