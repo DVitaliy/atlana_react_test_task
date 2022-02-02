@@ -10,4 +10,4 @@ jobs:
       - run: echo "======== ${{ github.ref }}"
       - run: echo "======== ${{ github.repository }}"
       - run: echo "======== ${{ github.workspace }}"
-      - run: echo "======== ${{ job.status }}"
+      - run: echo "======= ${{ job.status }}"
